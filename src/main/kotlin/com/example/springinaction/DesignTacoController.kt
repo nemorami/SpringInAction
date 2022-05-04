@@ -1,5 +1,7 @@
 package com.example.springinaction
 
+
+
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
@@ -13,7 +15,13 @@ data class Ingredient(val id: String? = null, val name: String? = null, val type
     }
 }
 data class TacoOrder(val deliveryName: String? = null, val deliveryStreet: String? = null, val deliveryCity: String? = null,
-                     val ccNumber: String? = null, val ccExpiration: String? = null, val ccCVV: String? = null)
+                     val deliveryState: String? = null, val deliveryZip: String? = null, val ccNumber: String? = null,
+                     val ccExpiration: String? = null, val ccCVV: String? = null) {
+    val tacos: MutableList<Taco> = ArrayList()
+    fun addTaco(taco: Taco) {
+        tacos.add(taco)
+    }
+}
 
 
 @Controller
@@ -23,7 +31,8 @@ class DesignTacoController {
     private val log = org.slf4j.LoggerFactory.getLogger(DesignTacoController::class.java)
     @ModelAttribute
     fun addIngredientsToModel(model: Model){
-        val ingredients = listOf(Ingredient("FLTO", "Flour Tortilla", Ingredient.Type.WRAP),
+        val ingredients = listOf(
+            Ingredient("FLTO", "Flour Tortilla", Ingredient.Type.WRAP),
             Ingredient("COTO", "Corn Tortilla", Ingredient.Type.WRAP),
             Ingredient("GRBF", "Ground Beef", Ingredient.Type.PROTEIN),
             Ingredient("CARN", "Carnitas", Ingredient.Type.PROTEIN),
@@ -45,7 +54,7 @@ class DesignTacoController {
     }
 
     @ModelAttribute(name = "tacoOrder")
-    fun tacoOrder(): TacoOrder {
+    fun order(): TacoOrder {
         return TacoOrder()
     }
 
@@ -57,6 +66,13 @@ class DesignTacoController {
     @GetMapping
     fun showDesignForm(): String {
         return "design"
+    }
+
+    @PostMapping
+    fun processTaco(taco: Taco, @ModelAttribute tacoOrder : TacoOrder): String {
+        tacoOrder.addTaco(taco)
+        log.info("Processing taco: ${taco}")
+        return "redirect:/orders/current"
     }
 
 

@@ -37,6 +37,7 @@
 
         <div class="ingredient-group" id="proteins">
             <h3>Pick your protein:</h3>
+
             <div th:each="ingredient : ${protein}">
                 <input th:field="*{ingredients}" type="checkbox"
                        th:value="${ingredient.id}"/>
