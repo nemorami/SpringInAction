@@ -2,21 +2,22 @@ package com.example.springinaction
 
 
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-data class Taco(val name: String? = null, val ingredients: List<Ingredient>? = null)
+data class Taco(val id: Long? = null, val name: String? = null, val ingredients: List<Ingredient>? = null, val createAt: Date = Date())
 
 data class Ingredient(val id: String? = null, val name: String? = null, val type: Type? = null) {
     enum class Type(){
         WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
     }
 }
-data class TacoOrder(val deliveryName: String? = null, val deliveryStreet: String? = null, val deliveryCity: String? = null,
+data class TacoOrder(val id: Long? = null, val deliveryName: String? = null, val deliveryStreet: String? = null, val deliveryCity: String? = null,
                      val deliveryState: String? = null, val deliveryZip: String? = null, val ccNumber: String? = null,
-                     val ccExpiration: String? = null, val ccCVV: String? = null) {
+                     val ccExpiration: String? = null, val ccCVV: String? = null, val placeAt: Date = Date()) {
     val tacos: MutableList<Taco> = ArrayList()
     fun addTaco(taco: Taco) {
         tacos.add(taco)
@@ -27,11 +28,11 @@ data class TacoOrder(val deliveryName: String? = null, val deliveryStreet: Strin
 @Controller
 @RequestMapping("/design")
 @SessionAttributes("tacoOrder")
-class DesignTacoController {
+class DesignTacoController(@Autowired val ingredientRepo: IngredientRepository) {
     private val log = org.slf4j.LoggerFactory.getLogger(DesignTacoController::class.java)
     @ModelAttribute
     fun addIngredientsToModel(model: Model){
-        val ingredients = listOf(
+       /* val ingredients = listOf(
             Ingredient("FLTO", "Flour Tortilla", Ingredient.Type.WRAP),
             Ingredient("COTO", "Corn Tortilla", Ingredient.Type.WRAP),
             Ingredient("GRBF", "Ground Beef", Ingredient.Type.PROTEIN),
@@ -42,7 +43,8 @@ class DesignTacoController {
             Ingredient("JACK", "Monterrey Jack", Ingredient.Type.CHEESE),
             Ingredient("SLSA", "Salsa", Ingredient.Type.SAUCE),
             Ingredient("SRCR", "Sour Cream", Ingredient.Type.SAUCE),
-        )
+        )*/
+        val ingredients = ingredientRepo.findAll()
         val types = Ingredient.Type.values()
         types.forEach {
             model.addAttribute(it.toString().lowercase(), filterByType(ingredients, it))
