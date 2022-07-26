@@ -1,6 +1,7 @@
 package com.example.springinaction
 
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
@@ -9,21 +10,22 @@ import java.util.Optional
 
 interface IngredientRepository {
     fun findAll() : List<Ingredient>
-    fun findById(id: String) : List<Ingredient>
+    fun findById(id: String) : Ingredient?
     fun save(ingredient: Ingredient): Ingredient
 }
 
 @Repository
-class JdbcIngredientRepository(val jdbcTemplate: JdbcTemplate) : IngredientRepository {
-
+class JdbcIngredientRepository(@Autowired val jdbcTemplate: JdbcTemplate) : IngredientRepository {
+//Check: jdbcTemplate가 @autowired가 아니면?
 
 
     override fun findAll(): List<Ingredient> {
         return jdbcTemplate.query("select id, name, type from Ingredient", mapper)
     }
 
-    override fun findById(id: String): List<Ingredient> {
-        return jdbcTemplate.query("select id, name, type from Ingredient where id=?", mapper,id)
+    override fun findById(id: String): Ingredient? {
+        val result =  jdbcTemplate.query("select id, name, type from Ingredient where id=?", mapper,id)
+        return if(result.size != 0)  result.get(0) else null
 
     }
 

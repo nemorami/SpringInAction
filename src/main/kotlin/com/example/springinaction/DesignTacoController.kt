@@ -5,20 +5,42 @@ package com.example.springinaction
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
+import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-data class Taco(val id: Long? = null, val name: String? = null, val ingredients: List<Ingredient>? = null, val createAt: Date = Date())
+data class Taco(
+    var id: Long? = null,
+    val name: String? = null,
+    val ingredients: MutableList<IngredientRef>? = null,
+    var createAt: Date = Date()
+) {
+    fun addIngredient(taco: Ingredient) {
+        if(taco.id != null)
+            ingredients?.add(IngredientRef(taco.id))
+    }
+}
 
 data class Ingredient(val id: String? = null, val name: String? = null, val type: Type? = null) {
     enum class Type(){
         WRAP, PROTEIN, VEGGIES, CHEESE, SAUCE
     }
 }
-data class TacoOrder(val id: Long? = null, val deliveryName: String? = null, val deliveryStreet: String? = null, val deliveryCity: String? = null,
-                     val deliveryState: String? = null, val deliveryZip: String? = null, val ccNumber: String? = null,
-                     val ccExpiration: String? = null, val ccCVV: String? = null, val placeAt: Date = Date()) {
-    val tacos: MutableList<Taco> = ArrayList()
+
+data class IngredientRef(val ingredient: String)
+data class TacoOrder(
+    var id: Long? = null,
+    var deliveryName: String? = null,
+    var deliveryStreet: String? = null,
+    var deliveryCity: String? = null,
+    var deliveryState: String? = null,
+    var deliveryZip: String? = null,
+    var ccNumber: String? = null,
+    var ccExpiration: String? = null,
+    var ccCVV: String? = null,
+    var placeAt: Date = Date()
+) {
+    val tacos: MutableList<Taco> = mutableListOf()
     fun addTaco(taco: Taco) {
         tacos.add(taco)
     }
@@ -45,14 +67,14 @@ class DesignTacoController(@Autowired val ingredientRepo: IngredientRepository) 
             Ingredient("SRCR", "Sour Cream", Ingredient.Type.SAUCE),
         )*/
         val ingredients = ingredientRepo.findAll()
-        val types = Ingredient.Type.values()
-        types.forEach {
+        Ingredient.Type.values().forEach {
             model.addAttribute(it.toString().lowercase(), filterByType(ingredients, it))
         }
+
     }
 
     private fun filterByType(ingredients: List<Ingredient>, type: Ingredient.Type): List<Ingredient> {
-        return ingredients.filter { (_, _, type1) -> type1 == type}.toList()
+        return ingredients.filter { it.type == type}
     }
 
     @ModelAttribute(name = "tacoOrder")
@@ -60,20 +82,25 @@ class DesignTacoController(@Autowired val ingredientRepo: IngredientRepository) 
         return TacoOrder()
     }
 
-    @ModelAttribute(name = "taco")
-    fun taco(): Taco {
-        return Taco()
-    }
+//    @ModelAttribute(name = "taco")
+//    fun taco(): Taco {
+//        return Taco()
+//    }
 
     @GetMapping
-    fun showDesignForm(): String {
-        return "design"
+    fun showDesignForm(@ModelAttribute taco: Taco, @ModelAttribute tacoOrder: TacoOrder) {
+
+      //  return "design"
     }
 
     @PostMapping
-    fun processTaco(taco: Taco, @ModelAttribute tacoOrder : TacoOrder): String {
+    fun processTaco(@ModelAttribute taco: Taco, errors: Errors, @ModelAttribute tacoOrder : TacoOrder): String {
+        if(errors.hasErrors()){
+            return "design"
+        }
         tacoOrder.addTaco(taco)
         log.info("Processing taco: ${taco}")
+        log.info("tocoOrder: ${tacoOrder.tacos}")
         return "redirect:/orders/current"
     }
 
