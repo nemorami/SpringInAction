@@ -2,17 +2,25 @@ package com.example.springinaction
 
 
 
+import org.hibernate.validator.constraints.CreditCardNumber
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.validation.Valid
+import javax.validation.constraints.*
 
 data class Taco(
     var id: Long? = null,
-    val name: String? = null,
-    val ingredients: MutableList<IngredientRef>? = null,
+
+    @field:NotNull
+    @field:Size(min=5, message="Name must be at least 5 characters long")
+    var name: String? = null,
+    @field:NotNull
+    @field:Size(min=1, message="You must choose at least 1 ingredient")
+    var ingredients: MutableList<IngredientRef>? = null,
     var createAt: Date = Date()
 ) {
     fun addIngredient(taco: Ingredient) {
@@ -30,13 +38,21 @@ data class Ingredient(val id: String? = null, val name: String? = null, val type
 data class IngredientRef(val ingredient: String)
 data class TacoOrder(
     var id: Long? = null,
+    @field:NotBlank(message = "Delivery name is required")
     var deliveryName: String? = null,
+    @field:NotBlank(message = "Street is required")
     var deliveryStreet: String? = null,
+    @field:NotBlank(message = "City is required")
     var deliveryCity: String? = null,
+    @field:NotBlank(message = "State is required")
     var deliveryState: String? = null,
+    @field:NotBlank(message = "Zip code is required")
     var deliveryZip: String? = null,
+    @field:CreditCardNumber(message = "Not a valid credit card number")
     var ccNumber: String? = null,
+    @field:Pattern(regexp="^(0[1-9]|1[0-2])([\\/])([2-9][0-9])$", message = "Must be formatted MM/YY")
     var ccExpiration: String? = null,
+    @field:Digits(integer=3, fraction=0, message="Invalid CVV")
     var ccCVV: String? = null,
     var placeAt: Date = Date()
 ) {
@@ -90,16 +106,18 @@ class DesignTacoController(@Autowired val ingredientRepo: IngredientRepository) 
     @GetMapping
     fun showDesignForm(@ModelAttribute taco: Taco, @ModelAttribute tacoOrder: TacoOrder) {
 
-      //  return "design"
+        // return "design"
     }
 
     @PostMapping
-    fun processTaco(@ModelAttribute taco: Taco, errors: Errors, @ModelAttribute tacoOrder : TacoOrder): String {
+    fun processTaco(@ModelAttribute @Valid taco: Taco, errors: Errors, @ModelAttribute tacoOrder : TacoOrder): String {
+        log.info("Processing taco: ${taco}")
         if(errors.hasErrors()){
+            log.info("Validation Errors ${errors}")
             return "design"
         }
         tacoOrder.addTaco(taco)
-        log.info("Processing taco: ${taco}")
+
         log.info("tocoOrder: ${tacoOrder.tacos}")
         return "redirect:/orders/current"
     }

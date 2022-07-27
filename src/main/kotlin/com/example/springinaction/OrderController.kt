@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.SessionAttributes
 import org.springframework.web.bind.support.SessionStatus
+import javax.validation.Valid
 
 
 @Controller
@@ -17,12 +18,12 @@ class OrderController(val orderRepo: OrderRepository) {
     private val log = org.slf4j.LoggerFactory.getLogger(DesignTacoController::class.java)
 
     @GetMapping("/current")
-    fun orderForm(): String {
-        //log.info("Processing tacoOrder: ${tacoOrder}")
+    fun orderForm(tacoOrder: TacoOrder): String {
+        log.info("Processing tacoOrder: ${tacoOrder}")
         return "orderForm"
     }
     @PostMapping
-    fun processOrder(order: TacoOrder, errors: Errors, sessionStatus: SessionStatus): String {
+    fun processOrder(@Valid order: TacoOrder, errors: Errors, sessionStatus: SessionStatus): String {
         log.info("Order submitted: ${order}")
         log.info("taco in Order: ${order.tacos}")
         if(errors.hasErrors())
