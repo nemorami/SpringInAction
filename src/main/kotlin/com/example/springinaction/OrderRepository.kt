@@ -16,6 +16,7 @@ interface OrderRepository {
 
 @Repository
 class JdbcOrderRepository(val jdbcOperations: JdbcOperations) : OrderRepository {
+    private val log = org.slf4j.LoggerFactory.getLogger(DesignTacoController::class.java)
     @Transactional
     override fun save(order: TacoOrder): TacoOrder {
         val sql = """insert into Taco_Order
@@ -36,7 +37,7 @@ class JdbcOrderRepository(val jdbcOperations: JdbcOperations) : OrderRepository 
 //            )
 //        )
 
-        val pscf = PreparedStatementCreatorFactory(
+        val psc = PreparedStatementCreatorFactory(
             sql, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
             Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
             Types.VARCHAR, Types.VARCHAR, Types.TIMESTAMP
@@ -48,14 +49,16 @@ class JdbcOrderRepository(val jdbcOperations: JdbcOperations) : OrderRepository 
                 order.ccNumber, order.ccExpiration, order.ccCVV, order.placeAt
             )
         )
-
         val keyHolder = GeneratedKeyHolder()
-        // keyHolder get 이 null을 린터할수 있는지
+        jdbcOperations.update(psc, keyHolder)
 
-        order.id = keyHolder.key!!.toLong()
+        // keyHolder get 이 null을 린터할수 있는지
+        //log.info(keyHolder.key.toString())
+        order.id = keyHolder.keys?.get("id").toString().toLong()
         order.tacos.forEachIndexed { index, taco ->
             saveTaco(order.id!!, index+1,  taco)
         }
+        log.info(order.toString())
         return order
     }
 
@@ -70,8 +73,11 @@ class JdbcOrderRepository(val jdbcOperations: JdbcOperations) : OrderRepository 
         }.newPreparedStatementCreator(listOf(taco.name, taco.createAt, orderId, orderKey))
 
         val keyHolder = GeneratedKeyHolder()
-        jdbcOperations.update(psc, keyHolder)
-        val tacoId = keyHolder.key!!.toLong()
+        //jdbcOperations.update(psc, keyHolder)
+        jdbcOperations.update(psc, keyHolder,);
+
+
+        val tacoId = keyHolder.keys?.get("id").toString().toLong()
         taco.id = tacoId
         saveIngredientRefs(tacoId, taco.ingredients)
         return tacoId

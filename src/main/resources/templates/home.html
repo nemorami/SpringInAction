@@ -4,20 +4,22 @@
     <meta charset="UTF-8">
     <title>Spring In Action</title>
 </head>
-<body>
-  <h1>Welcome to...</h1>
-  <img th:src="@{/images/spring.png}" />
-  <div th:utext="${myName}"></div>
-  <button th:id="${idName}" th:value="${btnName}">button</button>
-  <th:block th:each="num: ${list}">
-      <p th:text="${num}">NUM</p>
-  </th:block>
-
-  <form method="post" th:object="${data}">
-      <input type="number" th:field="*{id}">
-      <input type="text" th:field="*{name}">
-      <input type="text" th:field="*{addr}">
-      <input type="submit">
-  </form>
+<body><h1>Hello World</h1>
 </body>
+<!--<body>-->
+<!--  <h1>Welcome to...</h1>-->
+<!--  <img th:src="@{/images/spring.png}" />-->
+<!--  <div th:utext="${myName}"></div>-->
+<!--  <button th:id="${idName}" th:value="${btnName}">button</button>-->
+<!--  <th:block th:each="num: ${list}">-->
+<!--      <p th:text="${num}">NUM</p>-->
+<!--  </th:block>-->
+
+<!--  <form method="post" th:object="${data}">-->
+<!--      <input type="number" th:field="*{id}">-->
+<!--      <input type="text" th:field="*{name}">-->
+<!--      <input type="text" th:field="*{addr}">-->
+<!--      <input type="submit">-->
+<!--  </form>-->
+<!--</body>-->
 </html>

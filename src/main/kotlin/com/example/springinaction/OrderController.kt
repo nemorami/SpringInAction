@@ -28,7 +28,7 @@ class OrderController(val orderRepo: OrderRepository) {
         log.info("taco in Order: ${order.tacos}")
         if(errors.hasErrors())
             return "orderForm"
-       // orderRepo.save(order)
+        orderRepo.save(order)
         sessionStatus.setComplete()
         return "redirect:/"
     }

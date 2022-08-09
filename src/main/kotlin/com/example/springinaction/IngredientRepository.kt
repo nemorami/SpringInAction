@@ -25,7 +25,7 @@ class JdbcIngredientRepository(@Autowired val jdbcTemplate: JdbcTemplate) : Ingr
 
     override fun findById(id: String): Ingredient? {
         val result =  jdbcTemplate.query("select id, name, type from Ingredient where id=?", mapper,id)
-        return if(result.size != 0)  result.get(0) else null
+        return result.get(0)//return if(result.size != 0)  result.get(0) else null
 
     }
 
